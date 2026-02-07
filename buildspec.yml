@@ -22,7 +22,8 @@ phases:
 	  - echo pushing to repo...
 	  - docker push $REPOSITORY_URI:latest
 	  - docker push $REPOSITORY_URI:IMAGE_TAG
-	  - echo printion imagedefinition.json
+	  - touch imagedefinition.json
+	  - #echo printion imagedefinition.json
 	  - cat imagedefinition.json
 artifacts:
   files:
