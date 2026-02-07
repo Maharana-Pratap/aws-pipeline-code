@@ -1,14 +1,31 @@
 version: 0.2
+
 phases:
   pre_build:
     commands:
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 340197286661.dkr.ecr.ap-south-1.amazonaws.com
+      - echo "Loging into Amazon-Ecr..."
+      - aws --version
+	  - aws ecr get-login-password --region ap-south-1 | docker login --username AWS -password-stdin 340197286661.dkr.ecr.ap-south-1.amazonaws.com
+	  - REPOSITORY_URI: 340197286661.dkr.ecr.ap-south-1.amazonaws.com/maharana-demo:latest
+	  - IMAGE_TAG=build-$(echo $CODEBUILD_BUILD_ID | awk -f":" '{print $2}')
   build:
     commands:
-      - echo Building Spring Boot application...
-      - mvn package -DskipTests
-
+      - echo build started on 'date'
+	  - echo building on the jar file
+      - mvn clean install
+	  - echo building the Docker image...
+	  - docker build -t $REPOSITORY_URI:latest .
+	  - docker tag $REPOSITORY_URI:IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Build completed. Preparing artifacts..."
+	  - echo pushing to repo...
+	  - docker push $REPOSITORY_URI:latest
+	  - docker push $REPOSITORY_URI:IMAGE_TAG
+	  - echo printion imagedefinition.json
+	  - cat imagedefinition.json
 artifacts:
   files:
+	- imagedefinition.json
     - target/*.jar
   discard-paths: yes
